@@ -1,0 +1,70 @@
+========================================
+About
+========================================
+This client library supports the Exosite XMPP API.
+
+License is BSD, Copyright 2010, Exosite LLC
+
+
+========================================
+Required Packages
+========================================
+****************************************
+1) xmpppy
+****************************************
+http://xmpppy.sourceforge.net/
+http://sourceforge.net/projects/xmpppy/
+http://sourceforge.net/projects/xmpppy/files/xmpppy/0.4.0/xmpppy-0.4.0.win32.exe/download
+
+If running Debian Linux (or Ubuntu), you can > apt-get install python-xmpp
+
+****************************************
+2) dnspython
+****************************************
+http://www.dnspython.org/
+
+If running Debian Linux (or Ubuntu), you can > apt-get install python-dns
+NOTE: this step is not always necessary, depends on xmpp server you use
+
+
+========================================
+Installation
+========================================
+1.) Unpack the distribution package
+
+2.) Change into the source directory
+
+3.) Install the package
+	
+	python setup.py install
+
+
+========================================
+Quick Start
+========================================
+To access XMPP Chat API commands, use:
+
+	from exompp.xmmpchat import *
+	
+This library requires you to create a configuration file for storing XMPP connection
+settings.  Save this file somewhere within your application directory. It should
+include the following connection settings:
+
+	[Exosite_Connection]
+	password = <enter your xmpp account password>
+	user_id = <enter your xmpp account username>
+	exosite_bot = m2.exosite.com
+	
+Please refer to Exosite documentation for complete details.
+
+Feel free to extend the library as needed!
+
+
+========================================
+Release Info
+========================================
+
+Release 0.1
+----------------------------------------
+--) initial version
+
