@@ -1,12 +1,23 @@
+#==============================================================================
+# xmppchat.py
+# Implements XMPP chat class and buffering class for using XMPP chat to send
+# data to Exosite's Data Platform.
+#==============================================================================
+## Tested with python 2.6.5
+##
+## Copyright (c) 2010, Exosite LLC
+## All rights reserved.
+##
+
+
 """
-Functions and classes that support the Exosite XMPP Chat API.
+Functions and classes that support the Exosite XMPP Chat interface.
 """
 
 import sys
 import time
 import threading
 import xmpp
-import ConfigParser
 
 global devices
 global datasources
@@ -19,84 +30,27 @@ global outputBox
 kill_threads = False
 
 #===============================================================================
-def getconfiguration(cfg_filepath, section, printvalues):
-#===============================================================================
-  config = ConfigParser.RawConfigParser()
-  config.read(cfg_filepath)
-  config_list = {}
-  if printvalues:
-    print "======================"
-    print "%s Settings:" % section
-    print "======================"
-  for option in config.options(section):
-    config_list[option] = config.get(section, option)
-    if printvalues: print "%s: %s" % (option,config_list[option])
-  if printvalues:
-    print "======================"
-    print "\n"
-  return config_list
-
-#===============================================================================
-def getsubscribers(cfg_filepath, list_cik, printvalues):
-#===============================================================================
-  datasource_info = []
-  connection = getconfiguration (cfg_filepath,'Exosite_Connection',0)
-  exompp = Exompp(connection)
-  ## try to connect to Exosite
-  if -1 == exompp.connect():
-    print "Could not connect to Exosite - check your server settings"
-    return -1
-  if printvalues:
-    print "======================"
-    print "Subscribers in CIK list %s:" % list_cik
-    print "======================"
-  subscribers = -1
-  while -1 == subscribers:
-    subscribers = exompp.listdatasources(list_cik)
-    if -1 == subscribers: 
-      time.sleep(10)
-      print "Couldn\'t list data sources (%s), retrying connection." % list_cik
-      exompp.connect()
-  #loop through subscriber information
-  for k, v in subscribers.iteritems():
-    #information for each subscriber is stored in json format
-    parameters = json.loads(exompp.dsread(k,1))
-    if -1 != parameters:
-      #first load our subscriber device meta values
-      cik = parameters['cik']
-      location = parameters['location']
-      #second, loop through our json and get the list of the data sources
-      for pK, pV in parameters.iteritems():
-        if 'datasource' == pK[:len('datasource')]:
-          datasource_info.append({'cik':cik,'type':pV['type'],'datasource':pV['name'],'units':pV['units'],'prefs':pV['station']})
-          if printvalues: 
-            print datasource_info[len(datasource_info) - 1]
-  if printvalues:
-    print "======================"
-    print "\n"
-  return datasource_info
-  
-#===============================================================================
 class PublishToExosite ( threading.Thread ):
 #===============================================================================
 #-------------------------------------------------------------------------------
-  def __init__ ( self, cfg_filepath='' ):
+  def __init__ ( self, connection = {'user_id':'', 'password':'', 'exosite_bot':''}):
     threading.Thread.__init__ ( self )
     self.ringHead = 0
     self.ringTail = 0
     self.ringItems = 0
     self.ringSize = 256
     self.ring = {}
-    self.cfg_filepath = cfg_filepath
-    if self.cfg_filepath == '':
-      print "No cfg file defined - enter the full path to file"
-    connection = getconfiguration (self.cfg_filepath,'Exosite_Connection',1)
     self.exompp = Exompp(connection)
     ## try to connect to Exosite
     if -1 == self.exompp.connect():
       print "Could not connect to Exosite - check your server settings"
       return -1
     self.datasources = {}
+
+#-------------------------------------------------------------------------------
+  def stop ( self ):
+    global kill_threads
+    kill_threads = True
 
 #-------------------------------------------------------------------------------
   def addData ( self, device_cik, resource, value ):
@@ -122,7 +76,7 @@ class PublishToExosite ( threading.Thread ):
     lastcik = ''
     lastringsize = 0
     message_output = True
-    print "Monitoring Nodes, Publishing Data..."
+    print "Buffering started..."
     while False == kill_threads:
       if self.ringItems > 0:
         device_cik = self.ring[self.ringTail]['device_cik']
@@ -247,7 +201,7 @@ class Exompp():
       msg = xmpp.protocol.Message(to=self.connection['exosite_bot'],
                                   body='commanderid',
                                   typ='chat')
-      self.messenger.send(msg, self.stdcallback, 'XMPP Commander 0.1')
+      self.messenger.send(msg, self.stdcallback, '')
       if self.messenger.wait() == -1: 
         print "Connection error or timed out. connect()"
         retry += 1

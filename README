@@ -1,7 +1,7 @@
 ========================================
 About
 ========================================
-This client library supports the Exosite XMPP API.
+This library supports an XMPP chat interface to the Exosite Data Platform.
 
 License is BSD, Copyright 2010, Exosite LLC
 
@@ -45,16 +45,15 @@ Quick Start
 To access XMPP Chat API commands, use:
 
 	from exompp.xmmpchat import *
-	
-This library requires you to create a configuration file for storing XMPP connection
-settings.  Save this file somewhere within your application directory. It should
-include the following connection settings:
 
-	[Exosite_Connection]
-	password = <enter your xmpp account password>
-	user_id = <enter your xmpp account username>
-	exosite_bot = m2.exosite.com
-	
+This library requires you to initialize it with a list that includes the 
+following elements:
+{'user_id':<user_id>, 'password':<password>, 'exosite_bot':<exosite_bot>}
+
+	<user_id> = [Your xmpp account username, e.g. myxmppaccount@domain.com]
+	<password> = [Your xmpp account password]
+	<exosite_bot> = commander@m2.exosite.com
+
 Please refer to Exosite documentation for complete details.
 
 Feel free to extend the library as needed!
@@ -63,6 +62,13 @@ Feel free to extend the library as needed!
 ========================================
 Release Info
 ========================================
+
+Release 0.2
+----------------------------------------
+--) removed API version dependency
+--) changed instantiation to use parameters instead of config file path
+--) removed functions that didn't belong (getconfiguration and getsubscribers)
+--) added stop function to kill buffering thread
 
 Release 0.1
 ----------------------------------------
